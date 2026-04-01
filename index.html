@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagos</title>
+<link href="https://fonts.googleapis.com/css2?family=Circular+Std:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style/styles.css">
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div id="login-screen">
+  <div class="login-logo">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+    </svg>
+    Pagos
+  </div>
+  <div class="login-card">
+    <h2>Ingresa tu clave</h2>
+    <p>Acceso privado</p>
+    <div class="pin-row" id="pin-dots">
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+      <div class="pin-dot"></div>
+    </div>
+    <div class="numpad">
+      <button onclick="pinPress(1)">1</button>
+      <button onclick="pinPress(2)">2</button>
+      <button onclick="pinPress(3)">3</button>
+      <button onclick="pinPress(4)">4</button>
+      <button onclick="pinPress(5)">5</button>
+      <button onclick="pinPress(6)">6</button>
+      <button onclick="pinPress(7)">7</button>
+      <button onclick="pinPress(8)">8</button>
+      <button onclick="pinPress(9)">9</button>
+      <button onclick="pinPress(0)">0</button>
+      <button class="del-btn" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+      </svg>
+    </div>
+    <button class="nav-btn active" id="nav-home" onclick="showPanel('home')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span class="nav-tooltip">Inicio</span>
+    </button>
+    <button class="nav-btn" id="nav-settings" onclick="showPanel('settings')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+      <span class="nav-tooltip">Configuración</span>
+    </button>
+  </nav>
+
+  <div class="main">
+    <!-- Home Panel -->
+    <div id="home-panel">
+      <div class="header">
+        <div class="header-left">
+          <h1 id="header-title">Pagos</h1>
+          <p id="header-sub">Registro mensual</p>
+        </div>
+        <div class="year-control">
+          <button onclick="changeYear(-1)">‹</button>
+          <span id="year-display">2025</span>
+          <button onclick="changeYear(1)">›</button>
+        </div>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-label">Meses pagos</div>
+        <div class="progress-count" id="progress-count">0 <span>/ 12</span></div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="months-grid" id="months-grid"></div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel">
+      <div class="header">
+        <div class="header-left">
+          <h1>Configuración</h1>
+          <p>Personas y montos</p>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-section">
+          <h3>Personas (máx. 5)</h3>
+          <div id="people-list"></div>
+          <button class="add-person-btn" onclick="addPerson()">+ Agregar persona</button>
+          <button class="save-btn" onclick="savePeople()">Guardar cambios</button>
+        </div>
+        <div class="settings-section">
+          <h3>Monto por pago</h3>
+          <div class="amount-setting">
+            <label>Cada persona paga:</label>
+            <input type="number" id="amount-input" value="5000" min="1">
+          </div>
+          <button class="save-btn" onclick="saveAmount()">Guardar monto</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL (person action) ═══════════════ -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeModal(event)">
+  <div class="modal" id="action-modal">
+    <h3 id="modal-title">Registrar pago</h3>
+    <p class="modal-sub" id="modal-sub">Selecciona una acción</p>
+    <div class="modal-person">
+      <div class="modal-avatar" id="modal-avatar"></div>
+      <div class="modal-person-info">
+        <h4 id="modal-name"></h4>
+        <p id="modal-month-label"></p>
+      </div>
+    </div>
+    <div class="debt-alert" id="debt-alert"></div>
+    <div class="modal-actions">
+      <button class="action-btn green" onclick="markPaid()">✓ Ya pagó (monto estándar)</button>
+      <div class="amount-row">
+        <input type="number" class="amount-input" id="custom-amount" placeholder="Monto personalizado">
+        <button class="confirm-amount-btn" onclick="markPaidCustom()">Pagar</button>
+      </div>
+      <button class="action-btn red" onclick="closeModal()">✕ Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SKIP MODAL ═══════════════ -->
+<div class="modal-backdrop" id="skip-backdrop" onclick="closeSkipModal(event)">
+  <div class="modal" id="skip-modal">
+    <h3>Saltar vez</h3>
+    <p class="modal-sub">¿Quién no pagará este mes?</p>
+    <div class="skip-person-list" id="skip-person-list"></div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button class="action-btn green" onclick="confirmSkip()">Confirmar</button>
+      <button class="action-btn red" onclick="closeSkipModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<input type="file" id="photo-input" accept="image/*" style="display:none">
+
+<script src="script/script.js"></script>
+</body>
+</html>
