@@ -6,11 +6,10 @@
 const { createClient } = supabase;
 const _supabase = createClient(
   'https://adufcsfobkvgfisyiqxc.supabase.co',
-  'sb_publishable_QHjbkF5McVLksTLJZYESjQ_nmqVrvgJ'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkdWZjc2ZvYmt2Z2Zpc3lpcXhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODA4MDMsImV4cCI6MjA5MDY1NjgwM30.4ylPXuvUTi1bUb-28EZQGbL3ZcwC9RwjslrpSFyP1y8'
 );
 
 // ═══ CONSTANTES ═══
-const PIN          = '1597';
 const TODAY        = new Date();
 const CURRENT_MONTH = TODAY.getMonth();   // 0-indexed
 const CURRENT_YEAR  = TODAY.getFullYear();
@@ -21,6 +20,7 @@ const MONTHS = [
 
 // ═══ STATE ═══
 let pinValue    = '';
+let PIN         = null;  // se carga desde BD
 let currentYear = CURRENT_YEAR;
 
 let state = {
@@ -32,6 +32,20 @@ let state = {
 // ─────────────────────────────────────────
 //  SUPABASE — Lectura
 // ─────────────────────────────────────────
+
+async function loadPin() {
+  const { data, error } = await _supabase
+    .from('password')
+    .select('contraseña')
+    .single();
+  if (error) {
+    console.error('Error cargando PIN:', error);
+    return false;
+  }
+  PIN = String(data.contraseña);
+  console.log('✓ PIN cargado desde BD');
+  return true;
+}
 
 async function loadFromSupabase() {
   // 1. Perfiles
@@ -123,7 +137,12 @@ async function insertPerfil(name) {
     .insert({ nombre: name, foto_url: null, monto_sugerido: state.amount })
     .select()
     .single();
-  if (error) { showToast('Error creando perfil'); console.error(error); return null; }
+  if (error) {
+    console.error('❌ Error al crear perfil:', error.message, error.code, error);
+    showToast(`Error: ${error.message || 'No se pudo crear perfil'}`);
+    return null;
+  }
+  console.log('✓ Perfil creado:', data);
   return data;
 }
 
@@ -201,6 +220,12 @@ function pinPress(n) {
   updateDots();
   if (pinValue.length === 4) {
     setTimeout(() => {
+      if (!PIN) {
+        document.getElementById('login-error').textContent = 'Error cargando PIN';
+        pinValue = '';
+        updateDots();
+        return;
+      }
       if (pinValue === PIN) {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app').style.display = 'block';

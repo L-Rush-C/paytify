@@ -158,5 +158,23 @@
 
 <script src="app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Cargar PIN desde BD cuando la página inicia
+  document.addEventListener('DOMContentLoaded', async () => {
+    const loaded = await loadPin();
+    if (!loaded) {
+      document.getElementById('login-error').textContent = 'Error conectando a BD';
+    }
+  });
+</script>
+<script>
+  // Cargar PIN desde BD cuando la página inicia
+  document.addEventListener('DOMContentLoaded', async () => {
+    const loaded = await loadPin();
+    if (!loaded) {
+      document.getElementById('login-error').textContent = 'Error conectando a BD';
+    }
+  });
+</script>
 </body>
 </html>
