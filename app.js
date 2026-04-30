@@ -87,7 +87,7 @@ async function loadPagosForYear(year) {
     if (!state.payments[k]) state.payments[k] = {};
     state.payments[k][row.perfiles_id] = {
       paid:   row.estado_pago,
-      amount: row.monto_pagado || 0,
+      dinero: row.dinero || false,
       db_id:  row.id
     };
   });
@@ -97,7 +97,7 @@ async function loadPagosForYear(year) {
 //  SUPABASE — Escritura
 // ─────────────────────────────────────────
 
-async function upsertPago(perfilesId, mesIdx, year, paid, amount) {
+async function upsertPago(perfilesId, mesIdx, year, paid, dinero) {
   const mesStr   = MONTHS[mesIdx];
   const k        = monthKey(year, mesIdx);
   const existing = state.payments[k]?.[perfilesId];
@@ -105,13 +105,13 @@ async function upsertPago(perfilesId, mesIdx, year, paid, amount) {
   if (existing?.db_id) {
     const { error } = await _supabase
       .from('pagos')
-      .update({ estado_pago: paid, monto_pagado: amount })
+      .update({ estado_pago: paid, dinero: dinero })
       .eq('id', existing.db_id);
     if (error) { showToast('Error guardando en BD'); console.error(error); }
   } else {
     const { data, error } = await _supabase
       .from('pagos')
-      .insert({ perfiles_id: perfilesId, mes: mesStr, año: year, estado_pago: paid, monto_pagado: amount })
+      .insert({ perfiles_id: perfilesId, mes: mesStr, año: year, estado_pago: paid, dinero: dinero })
       .select()
       .single();
     if (error) { showToast('Error guardando en BD'); console.error(error); }
@@ -172,7 +172,7 @@ function getMonthData(year, month) {
   if (!state.payments[k]) state.payments[k] = {};
   state.people.forEach(p => {
     if (!state.payments[k][p.id]) {
-      state.payments[k][p.id] = { paid: false, amount: 0 };
+      state.payments[k][p.id] = { paid: false, dinero: false };
     }
   });
   return state.payments[k];
@@ -412,11 +412,11 @@ function openPersonModal(personId, month) {
     debtAlert.className = 'debt-alert';
   }
 
-  document.getElementById('custom-amount').value = '';
+  const hasDinero = pd.dinero || false;
+  document.getElementById('action-modal').querySelector('.action-btn.yellow').textContent =
+    hasDinero ? '💰 Ya tiene el dinero (desmarcar)' : '💰 Tiene el dinero';
   document.getElementById('action-modal').querySelector('.action-btn.green').textContent =
-    pd.paid
-      ? '✓ Ya marcado como pagado (desmarcar)'
-      : `✓ Ya pagó (${formatAmount(state.amount)})`;
+    pd.paid ? '✓ Ya marcado como pagado (desmarcar)' : '✓ Ya se recogió (marcar pago)';
 
   document.getElementById('modal-backdrop').classList.add('open');
 }
@@ -428,40 +428,36 @@ function closeModal(e) {
 }
 
 async function markPaid() {
-  const yr  = currentYear;
-  const m   = modalMonth;
+  const yr   = currentYear;
+  const m    = modalMonth;
   const data = getMonthData(yr, m);
   const pd   = data[modalPersonId];
 
-  const newPaid   = !pd.paid;
-  const newAmount = newPaid ? state.amount + getDebt(modalPersonId, yr, m) : 0;
+  const newPaid = !pd.paid;
+  if (newPaid) pd.dinero = true; // si se marca como pagado, dinero también queda true
+  pd.paid = newPaid;
 
-  pd.paid   = newPaid;
-  pd.amount = newAmount;
-
-  await upsertPago(modalPersonId, m, yr, newPaid, newAmount);
+  await upsertPago(modalPersonId, m, yr, newPaid, pd.dinero);
   saveState();
   closeModal();
   renderMonths();
   showToast(newPaid ? '✓ Pago registrado' : 'Pago removido', newPaid ? 'green' : '');
 }
 
-async function markPaidCustom() {
-  const val = parseFloat(document.getElementById('custom-amount').value);
-  if (!val || val <= 0) { showToast('Ingresa un monto válido'); return; }
-
-  const yr  = currentYear;
-  const m   = modalMonth;
+async function markDinero() {
+  const yr   = currentYear;
+  const m    = modalMonth;
   const data = getMonthData(yr, m);
+  const pd   = data[modalPersonId];
 
-  data[modalPersonId].paid   = true;
-  data[modalPersonId].amount = val;
+  const newDinero = !pd.dinero;
+  pd.dinero = newDinero;
 
-  await upsertPago(modalPersonId, m, yr, true, val);
+  await upsertPago(modalPersonId, m, yr, pd.paid, newDinero);
   saveState();
   closeModal();
   renderMonths();
-  showToast(`✓ Pago de ${formatAmount(val)} registrado`, 'green');
+  showToast(newDinero ? '💰 Dinero registrado' : 'Dinero desmarcado', newDinero ? 'green' : '');
 }
 
 // ─────────────────────────────────────────

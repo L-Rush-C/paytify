@@ -343,6 +343,8 @@ body {
 .action-btn.green:hover   { background: var(--green-dim); }
 .action-btn.red           { border-color: var(--red); color: var(--red); }
 .action-btn.red:hover     { background: var(--red-dim); }
+.action-btn.yellow        { border-color: var(--yellow); color: var(--yellow); }
+.action-btn.yellow:hover  { background: var(--yellow-dim); }
 
 .amount-row {
   display: flex; gap: 8px; align-items: center;
